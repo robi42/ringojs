@@ -1,9 +1,4 @@
-// use google datastore if it is available, else fall back to filestore
-try {
-    include('helma/storage/googlestore');
-} catch (error) {
-    include('helma/storage/filestore');
-}
+include('helma/storage/dbstore/hibernate');
 
 export('Book', 'Author');
 

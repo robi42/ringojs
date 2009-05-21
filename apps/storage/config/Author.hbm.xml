@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class entity-name="Author" table="STORAGE_AUTHORS">
+        <cache usage="read-write"/>
+
+        <id name="id"
+            column="AUTHOR_ID"
+            type="long">
+            <generator class="native"/>
+        </id>
+
+        <property name="name"
+                  column="AUTHOR_NAME"
+                  type="string"
+                  not-null="true"/>
+
+        <set name="books" table="STORAGE_BOOKS">
+            <key column="BOOK_F_AUTHOR_ID"/>
+            <one-to-many class="Book"/>
+        </set>
+
+    </class>
+
+</hibernate-mapping>
