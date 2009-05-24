@@ -18,7 +18,7 @@
                   type="string"
                   not-null="true"/>
 
-        <set name="books" table="STORAGE_BOOKS">
+        <set name="books" table="STORAGE_BOOKS" lazy="false">
             <key column="BOOK_F_AUTHOR_ID"/>
             <one-to-many class="Book"/>
         </set>
