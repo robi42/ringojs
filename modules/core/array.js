@@ -139,3 +139,15 @@ Object.defineProperty(Array.prototype, "partition", {
     }, writable: true
 });
 
+/**
+ * @returns {Array} the corresponding set representation of this array.
+ */
+Object.defineProperty(Array.prototype, 'unique', {
+    value: function () {
+        var set = new java.util.TreeSet();
+        for each (let item in this) {
+            set.add(item);
+        }
+        return [item for each (item in Iterator(set))];
+    }, writable: true
+});
