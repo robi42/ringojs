@@ -3,8 +3,9 @@ var {Stream} = require('io');
 var {Buffer} = require('ringo/buffer');
 var {Headers, getMimeParameter} = require('./util');
 var {mimeType} = require('./mime');
-var dates = require('ringo/utils/dates');
-var webenv = require('ringo/webapp/env');
+var {render} = require('ringo/skin');
+var dates = require('ringo/utils/dates'),
+    webenv = require('ringo/webapp/env');
 
 export('Response');
 
@@ -17,49 +18,48 @@ function Response() {
         return response;
     }
 
-    var config = webenv.getConfig();
-    var status = 200;
-    var charset = config && config.charset || 'utf-8';
-    var contentType = config && config.contentType || 'text/html';
-    var headers = new Headers();
-    var buffer = new Buffer();
+    var config = webenv.getConfig(),
+        status = 200,
+        charset = config && config.charset || 'utf-8',
+        contentType = config && config.contentType || 'text/html',
+        headers = new Headers(),
+        buffer = new Buffer();
 
-    this.write = function write() {
+    this.write = function() {
         var length = arguments.length;
         for (var i = 0; i < length; i++) {
             buffer.write(String(arguments[i]));
-            if (i < length - 1)
+            if (i < length - 1) {
                 buffer.write(' ');
+            }
         }
         return this;
     };
 
     this.write.apply(this, arguments);
 
-    this.writeln = function writeln() {
+    this.writeln = function() {
         this.write.apply(this, arguments);
         buffer.write('\r\n');
         return this;
     };
 
-
     /**
-     * Render a skin to the response's buffer
+     * Render a skin to the response's buffer.
      * @param skin path to skin resource
      * @param context context object
      */
-    this.render = function render(skin, context) {
-        var render = require('ringo/skin').render;
+    this.render = function(skin, context) {
         buffer.write(render(skin, context));
     };
 
     /**
      * Print a debug message to the rendered page.
      */
-    this.debug =  function debug() {
+    this.debug = function() {
         var buffer = this.debugBuffer || new Buffer();
-        buffer.write("<div class=\"ringo-debug-line\" style=\"background: yellow;");
-        buffer.write("color: black; border-top: 1px solid black;\">");
+        buffer.write('<div class="ringo-debug-line" style="background: yellow;');
+        buffer.write('color: black; border-top: 1px solid black;">');
         var length = arguments.length;
         for (var i = 0; i < length; i++) {
             buffer.write(arguments[i]);
@@ -67,7 +67,7 @@ function Response() {
                 buffer.write(" ");
             }
         }
-        buffer.writeln("</div>");
+        buffer.writeln('</div>');
         this.debugBuffer = buffer;
         return null;
     };
@@ -88,30 +88,18 @@ function Response() {
         headers.set('Location', String(location));
     };
 
-    Object.defineProperty(this, 'charset', {
-        get: function() {
-            return charset;
+    Object.defineProperties(this, {
+        charset: {
+            get: function() charset,
+            set: function(c) (charset = c)
         },
-        set: function(c) {
-            charset = c;
-        }
-    });
-
-    Object.defineProperty(this, 'contentType', {
-        get: function() {
-            return contentType;
+        contentType: {
+            get: function() contentType,
+            set: function(c) (contentType = c)
         },
-        set: function(c) {
-            contentType = c;
-        }
-    });
-
-    Object.defineProperty(this, 'status', {
-        get: function() {
-            return status;
-        },
-        set: function(s) {
-            status = s;
+        status: {
+            get: function() status,
+            set: function(s) (status = s)
         }
     });
 
@@ -128,9 +116,9 @@ function Response() {
      */
     this.setHeader = function(key, value) {
         key = String(key);
-        if (key.toLowerCase() == "content-type") {
+        if (key.toLowerCase() === 'content-type') {
             contentType = String(value);
-            charset = getMimeParameter(contentType, "charset") || charset;
+            charset = getMimeParameter(contentType, 'charset') || charset;
         }
         headers.set(key, String(value));
         return this;
@@ -175,29 +163,29 @@ function Response() {
     this.setCookie = function(key, value, days, options) {
         if (value) {
             // remove newline chars to prevent response splitting attack as value may be user-provided
-            value = value.replace(/[\r\n]/g, "");
+            value = value.replace(/[\r\n]/g, '');
         }
-        var buffer = new Buffer(key, "=", value);
-        if (typeof days == "number" && days > -1) {
-            var expires = days == 0 ?
+        var buffer = new Buffer(key, '=', value);
+        if (typeof days === 'number' && days > -1) {
+            var expires = days === 0 ?
                 new Date(0) : new Date(Date.now() + days * 1000 * 60 * 60 * 24);
-            var cookieDateFormat = "EEE, dd-MMM-yyyy HH:mm:ss zzz";
-            buffer.write("; expires=");
-            buffer.write(dates.format(expires, cookieDateFormat, "en", "GMT"));
+            var cookieDateFormat = 'EEE, dd-MMM-yyyy HH:mm:ss zzz';
+            buffer.write('; expires=');
+            buffer.write(dates.format(expires, cookieDateFormat, 'en', 'GMT'));
         }
         options = options || {};
-        var path = options.path || "/";
-        buffer.write("; path=", encodeURI(path));
+        var path = options.path || '/';
+        buffer.write('; path=', encodeURI(path));
         if (options.domain) {
-            buffer.write("; domain=", options.domain.toLowerCase());
+            buffer.write('; domain=', options.domain.toLowerCase());
         }
         if (options.secure) {
-            buffer.write("; secure");
+            buffer.write('; secure');
         }
         if (options.httpOnly) {
-            buffer.write("; HttpOnly");
+            buffer.write('; HttpOnly');
         }
-        this.addHeader("Set-Cookie", buffer.toString());
+        this.addHeader('Set-Cookie', buffer.toString());
         return this;
     };
 
@@ -209,9 +197,9 @@ function Response() {
         this.flushDebug();
         if (contentType && !headers.contains('content-type')) {
             if (charset) {
-                contentType += "; charset=" + charset;
+                contentType += '; charset=' + charset;
             }
-            headers.set("Content-Type", contentType);
+            headers.set('Content-Type', contentType);
         }
         return {
             status: status,
@@ -231,7 +219,6 @@ Response.skin = function (skin, context) {
     if (!(skin instanceof org.ringojs.repository.Resource)) {
         skin = getResource(skin);
     }
-    var render = require('ringo/skin').render;
     return new Response(render(skin, context));
 };
 
@@ -240,9 +227,9 @@ Response.skin = function (skin, context) {
  * @param {Object} object the object whose JSON representation to return
  */
 Response.json = function (object) {
-    var res = new Response(JSON.stringify(object));
-    res.contentType = 'application/json';
-    return res;
+    var response = new Response(JSON.stringify(object));
+    response.contentType = 'application/json';
+    return response;
 };
 
 /**
@@ -250,9 +237,10 @@ Response.json = function (object) {
  * @param {XML|String} xml an XML document
  */
 Response.xml = function (xml) {
-    var res = new Response(typeof xml === 'xml' ? xml.toXMLString() : xml);
-    res.contentType = 'application/xml';
-    return res;
+    var response = new Response(typeof xml === 'xml' ?
+            xml.toXMLString() : xml);
+    response.contentType = 'application/xml';
+    return response;
 };
 
 /**
@@ -262,11 +250,11 @@ Response.xml = function (xml) {
  *         the MIME type is detected from the file name extension.
  */
 Response.static = function (resource, contentType) {
-    if (typeof resource == 'string') {
+    if (typeof resource === 'string') {
         resource = getResource(resource);
     }
     if (!(resource instanceof org.ringojs.repository.Resource)) {
-        throw Error("Wrong argument for static response: " + typeof(resource));
+        throw new Error('Wrong argument for static response: ' + typeof(resource));
     }
     if (!resource.exists()) {
         return Response.notFound(String(resource));
@@ -279,12 +267,12 @@ Response.static = function (resource, contentType) {
         },
         body: {
             digest: function() {
-                return resource.lastModified().toString(36) 
-                    + resource.length.toString(36);
+                return resource.lastModified().toString(36)
+                        + resource.length.toString(36);
             },
             forEach: function(fn) {
-                var read, bufsize = 8192;
-                var buffer = new ByteArray(bufsize);
+                var read, bufsize = 8192,
+                    buffer = new ByteArray(bufsize);
                 input = new Stream(resource.getInputStream());
                 while ((read = input.readInto(buffer)) > -1) {
                     buffer.length = read;
@@ -324,10 +312,13 @@ Response.notFound = function (location) {
         headers: {
             'Content-Type': 'text/html'
         },
-        body: [ '<html><title>', msg, '</title>',
-                '<body><h2>', msg, '</h2>',
-                '<p>The requested URL ', String(location), ' was not found on the server.</p>',
-                '</body></html>']
+        body: [
+            '<html><title>', msg, '</title>',
+            '<body><h2>', msg, '</h2>',
+            '<p>The requested URL ', String(location),
+            ' was not found on the server.</p>',
+            '</body></html>'
+        ]
     };
 };
 
