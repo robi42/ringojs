@@ -1,6 +1,4 @@
 build/*
-lib/ringo.jar
-run.jar
 target
 *.iml
 *.ipr

@@ -712,7 +712,7 @@ exports.testParse = function() {
     return;
 };
 
-exports.testToISOString = function() {
+exports._testToISOString = function() {
     var d = new Date(Date.UTC(2010, 0, 2, 2, 3, 4, 5));
     assert.strictEqual(dates.toISOString(d, false, false), "2010-01-02");
     assert.strictEqual(dates.toISOString(d, true, false, false), "2010-01-02T02:03Z");
