@@ -7,7 +7,7 @@ exports.app = function (req) {
         body: [
             "Hello, shiny Ringo world!", "\n\n",
             "Here's my home:", "\n",
-            env['ringo.home'], "\n",
+            env['ringo.home'], "\n\n",
             "I'm running on:", "\n",
             env['java.runtime.name']
         ]
