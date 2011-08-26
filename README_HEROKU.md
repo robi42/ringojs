@@ -4,7 +4,7 @@
 
     $ gem install heroku
     $ heroku create --stack cedar
-    $ git push origin heroku
+    $ git push heroku master
 
 ## Dev
 
